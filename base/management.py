@@ -7,35 +7,42 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.storage import default_storage
 
-from .models import MarketUser, Product, Receipt, Category
-from .serializer import UserSerializer, ProductSerializer, CategorySerializer, ReceiptSerializer
+from .models import MarketUser, Product, Receipt, Category, Coupon
+from .serializer import UserSerializer, ProductSerializer, CategorySerializer, ReceiptSerializer, CouponSerializer
 
 import json
+import logging
+logger = logging.getLogger(__name__)
 # Management
 @permission_classes([IsAuthenticated, IsAdminUser])
 @api_view(["GET"])
 def receipts(request):    
-    receipts = Receipt.objects.all()
-    products = Product.objects.all()
-    product_serializer = ProductSerializer(products, many=True)  # Use the serializer
-    allproducts = product_serializer.data  # Retrieve the serialized data
-    payload = []
-    for receipt in receipts:
+    try:
+        receipts = Receipt.objects.all()
+        products = Product.objects.all()
+        product_serializer = ProductSerializer(products, many=True)  
+        allproducts = product_serializer.data  
+        payload = []
+        for receipt in receipts:
+            try:
+                recuser = MarketUser.objects.get(id=receipt.user_id)
+                products_list = json.loads(receipt.products)
+                payload.append({
+                    "id": receipt.id,
+                    "orderid": receipt.orderid,
+                    "price": receipt.price,
+                    "products": products_list,
+                    "discount": receipt.discount,
+                    "recuser": {"userid": recuser.id, "username": recuser.username}
+                })
+            except MarketUser.DoesNotExist as e:
+                logger.error(f"User Receipts not found: {e}")
+                return Response({"success": False, "message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"success":True,"payload":payload,"products":allproducts,"message":"Success"})
+    except Exception as e:
+        logger.error(f"Error in retrieving receipts: {e}")
+        return Response({"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        try:
-            recuser = MarketUser.objects.get(id=receipt.user_id)
-            products_list = json.loads(receipt.products)
-            payload.append({
-                "id": receipt.id,
-                "orderid": receipt.orderid,
-                "price": receipt.price,
-                "products": products_list,
-                "discount": receipt.discount,
-                "recuser": {"userid": recuser.id, "username": recuser.username}
-            })
-        except MarketUser.DoesNotExist:
-            return Response({"success": False, "message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-    return Response({"success":True,"payload":payload,"products":allproducts,"message":"Success"})
 
 @permission_classes([IsAuthenticated, IsAdminUser])
 @api_view(["GET"])
@@ -132,42 +139,114 @@ def deleteuser(request,pk):
 @permission_classes([IsAuthenticated, IsAdminUser])
 class UManagementView(APIView):
     def get(self, request):
-        users = MarketUser.objects.all()
-        sendusers = []
-        for user in users:
-            sendusers.append({
-                "username": user.username,
-                "id": user.id,
-                "firstname": user.firstname,
-                "lastname": user.lastname,
-                "email": user.email,
-                "gender": user.gender,
-                "dob": user.date_of_birth.isoformat() if user.date_of_birth else None,
-                "img": user.img,
-                "is_staff": user.is_staff,
-            })        
-        serializer = UserSerializer(sendusers, many=True)
-        return Response(serializer.data)
+        try:
+            users = MarketUser.objects.all()
+            sendusers = []
+            for user in users:
+                sendusers.append({
+                    "username": user.username,
+                    "id": user.id,
+                    "firstname": user.firstname,
+                    "lastname": user.lastname,
+                    "email": user.email,
+                    "gender": user.gender,
+                    "dob": user.date_of_birth.isoformat() if user.date_of_birth else None,
+                    "img": user.img,
+                    "is_staff": user.is_staff,
+                })        
+            serializer = UserSerializer(sendusers, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in GET /umanagment/users: {e}")
+            return Response({"error": "An error occurred while fetching users"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data, context={'user': request.user})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = UserSerializer(data=request.data, context={'user': request.user})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error in POST /umanagment/users: {e}")
+            return Response({"error": "An error occurred while creating a user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
    
     def put(self, request, pk):
-        user = MarketUser.objects.get(pk=pk)
-        serializer = UserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = MarketUser.objects.get(pk=pk)
+            serializer = UserSerializer(user, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except MarketUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in PUT /users/{pk}: {e}")
+            return Response({"error": "An error occurred while updating the user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
    
     def delete(self, request, pk):
-        user = MarketUser.objects.get(pk=pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            user = MarketUser.objects.get(pk=pk)
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except MarketUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in DELETE /users/{pk}: {e}")
+            return Response({"error": "An error occurred while deleting the user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
+@permission_classes([IsAuthenticated, IsAdminUser])
+class CManagementView(APIView):
+    def get(self, request):
+        try:
+            coupons = Coupon.objects.all()   
+            serializer = CouponSerializer(coupons, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in GET /coupons/: {e}")
+            return Response({"error": "An error occurred while trying to get all coupons"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
+            serializer = CouponSerializer(data=request.data, context={'user': request.user})
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"success": True, "message": "Coupon Added Successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"success": False, "message": "Coupon Creation Failed"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error in POST /coupons: {e}")
+            return Response({"error": "An error occurred while creating a coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+   
+    def put(self, request, pk):
+        try:
+            coupon = Coupon.objects.get(pk=pk)
+            serializer = CouponSerializer(coupon, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Coupon.DoesNotExist:
+            return Response({"error": "Coupon not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in PUT /coupons/{pk}: {e}")
+            return Response({"error": "An error occurred while updating the coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+   
+    def delete(self, request, pk):
+        try:
+            coupon = Coupon.objects.get(pk=pk)
+            coupon.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Coupon.DoesNotExist:
+            return Response({"error": "Coupon not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in DELETE /coupons/{pk}: {e}")
+            return Response({"error": "An error occurred while deleting the coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @permission_classes([IsAuthenticated, IsAdminUser])
 class ProductsView(APIView):
@@ -175,45 +254,53 @@ class ProductsView(APIView):
     This class handle the CRUD operations for MyModel
     """
     def get(self, request):
+        try:
+            products = Product.objects.all()
+            serializer = ProductSerializer(products, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error in GET /products: {e}")
+            return Response({"error": "An error occurred while fetching products"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        """
-        Handle GET requests to return a list of MyModel objects
-        """
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
 
     def post(self, request):
-        
+        try:
+            serializer = ProductSerializer(data=request.data, context={'user': request.user})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error in POST /products: {e}")
+            return Response({"error": "An error occurred while creating a product"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        """
-        Handle POST requests to create a new Task object
-        """
-
-        serializer = ProductSerializer(data=request.data, context={'user': request.user})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    
     def put(self, request, pk):
-        """
-        Handle PUT requests to update an existing Task object
-        """
-        product = Product.objects.get(pk=pk)
-        serializer = ProductSerializer(product, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            product = Product.objects.get(pk=pk)
+            serializer = ProductSerializer(product, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in PUT /products/{pk}: {e}")
+            return Response({"error": "An error occurred while updating the product"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
    
     def delete(self, request, pk):
-        """
-        Handle DELETE requests to delete a Task object
-        """
-        product = Product.objects.get(pk=pk)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            product = Product.objects.get(pk=pk)
+            product.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error in DELETE /products/{pk}: {e}")
+            return Response({"error": "An error occurred while deleting the product"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     
 @permission_classes([IsAuthenticated, IsAdminUser])
 class PManagemetView(APIView):

@@ -28,3 +28,7 @@ class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
         fields = ['id', 'code', 'desc', 'percent', 'min_price']
+
+    def create(self, validated_data):
+        validated_data['code'] = Coupon.generate_unique_code()
+        return super().create(validated_data)

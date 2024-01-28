@@ -48,9 +48,16 @@ class Product(models.Model):
     def __str__(self):
            return self.desc
     
+import uuid
+from django.db import models
+
 class Coupon(models.Model):
     id = models.AutoField(primary_key=True) 
-    code = models.CharField(max_length=150,null=True)
-    desc = models.CharField(max_length=80,null=True)
+    code = models.CharField(max_length=150, null=True, unique=True)
+    desc = models.CharField(max_length=80, null=True)
     percent = models.FloatField(null=True)
     min_price = models.FloatField(default=100, null=True)
+
+    @staticmethod
+    def generate_unique_code():
+        return str(uuid.uuid4())[:8]  # Generates a unique 8 character code

@@ -3,7 +3,7 @@ from django.urls import path, include
 from . import views
 from .views import RegistrationView
 from . import management
-from .management import ProductsView, PManagemetView, UManagementView
+from .management import ProductsView, PManagemetView, UManagementView, CManagementView
 from .recipemanager import RecommendRecipesAPIView
 from .passwordreset import PasswordResetRequestView, PasswordResetConfirmView
 urlpatterns = [
@@ -19,6 +19,7 @@ urlpatterns = [
     path('umanagement/receipts/<int:pk>/',management.get_user_receipts, name='user-manage-receipts'),
     path('umanagement/set/', management.setstaff,name='set-staff'),
     path('umanagement/delete/<int:pk>/', management.deleteuser,name='delete-user'),
+    path('cmanagement/', CManagementView.as_view(), name='user-manage'),
     path('getreceipts/', management.receipts),
 
     #Users

@@ -13,7 +13,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.files.uploadedfile import SimpleUploadedFile
 import json
 from decimal import Decimal
-
+import logging
+logger = logging.getLogger(__name__)
 
 
 from datetime import datetime, timedelta
@@ -94,117 +95,120 @@ class MyTokenObtainPairView(TokenObtainPairView):
 def productlist(request):
     if not request.method: return
     if request.method == "GET":
-        # Get All Products / Categories and return to the requesting Client
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        
-        categories = Category.objects.all()
-        serializer2 = CategorySerializer(categories, many=True)
+        try:
+            products = Product.objects.all()
+            serializer = ProductSerializer(products, many=True)
 
-        # Combine the serialized data into a single dictionary
-        combined_data = {
-            'products': serializer.data,
-            'categories': serializer2.data,
-        }
-        return Response(combined_data)
+            categories = Category.objects.all()
+            serializer2 = CategorySerializer(categories, many=True)
+
+            combined_data = {'products': serializer.data, 'categories': serializer2.data}
+            return Response(combined_data)
+        except Exception as e:
+            logger.error(f"Error in GET /productlist: {e}")
+            return Response({"error": "An error occurred while fetching products and categories"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     elif request.method == "POST":
         # The Client purchased the cart
-        user = request.user
-        price = Decimal(str(request.data['price']))
-        cart = request.data['cart']
-        coupon = request.data['coupon']
-
-        #Paypal orderid
-        orderid = request.data['orderid']
-
-
-
-        totalPrice = Decimal('0')
-
-        PurchasedItems = []
-        # Here we are looping through the items he bought
-        # we make sure all the items are known to the system, and that their prices aren't messed up.
         try:
-            for item_info in cart:
-                item_id = item_info.get('id')
-                product = Product.objects.get(id=item_id)
-                if product:
-                    if product.price == Decimal(item_info['price']):
-                        itemprice = Decimal(item_info['price'])
-                        totalPrice += (itemprice * item_info['count'])
-                        PurchasedItems.append({
-                            "item": item_id,
-                            "count": item_info['count'],
-                            "price": float((itemprice * item_info['count']).quantize(Decimal('0.01')))
-                        })
-                    else:
-                        print("Warning, Wrong Price")
-                        return Response({"success": False, "message": "ERROR, Something went wrong."})
-                else:
-                    print("Warning, Unauthorized Item Detected.")
-                    return Response({"success": False, "message": "ERROR, Something went wrong."})
-            #if the price is as should be we carry on
-            if totalPrice == price:
-                user_instance = MarketUser.objects.get(username=user)
+            user = request.user
+            price = Decimal(str(request.data['price']))
+            cart = request.data['cart']
+            coupon = request.data['coupon']
+
+            #Paypal orderid
+            orderid = request.data['orderid']
 
 
-                # if the orderid was already used we stop the process to avoid duplications
-                if orderid in UsedOrders:
-                    return Response({"success": False, "message": "This order ID has already been used."}, status=400)
-                
-                # if not we add it to UsedOrders to avoid duplications
-                UsedOrders.append(orderid)
 
-                # Get The Order details from paypal
-                sale_details = get_sale_id(orderid)
+            totalPrice = Decimal('0')
 
-                # make sure the order actually exists in paypal api
-                if(sale_details):
-                    #make sure the order is not older than 1 minute.
-                    if(not check_time_elapsed(sale_details['sale_id']['create_time'])):
-                        return Response({"success": False, "message": "This order ID has already been used."}, status=400) # Too Old
-                    
-                    #if a coupon is used we caculate what price the client should pay
-                    if(coupon and 'code' in coupon):
-                        coupon_code = coupon['code']
-                        existing_coupon = Coupon.objects.filter(code=coupon_code).first()
-                        if not existing_coupon:
-                            return Response({'success': False, 'message': "The Coupon You Have sent does not exist"}, status=400)
+            PurchasedItems = []
+            # Here we are looping through the items he bought
+            # we make sure all the items are known to the system, and that their prices aren't messed up.
+            try:
+                for item_info in cart:
+                    item_id = item_info.get('id')
+                    product = Product.objects.get(id=item_id)
+                    if product:
+                        if product.price == Decimal(item_info['price']):
+                            itemprice = Decimal(item_info['price'])
+                            totalPrice += (itemprice * item_info['count'])
+                            PurchasedItems.append({
+                                "item": item_id,
+                                "count": item_info['count'],
+                                "price": float((itemprice * item_info['count']).quantize(Decimal('0.01')))
+                            })
                         else:
-                            print(f"Coupon {coupon_code} Found Successfully, %{coupon['percent']} Given")
-                            existing_coupon.delete()
-                            totalPrice = Decimal(float(totalPrice) - (coupon['percent'] / 100) * float(totalPrice))
-                            totalPrice = round(totalPrice, 2)
-                        
-                    #Add the order to a list to avoid having it used twice
-                    
-
-                    #prepare the receipt
-                    receipt_data = {
-                        'orderid': orderid or "UNKNOWN ERROR",
-                        'products': json.dumps(PurchasedItems),
-                        'price': float(totalPrice),
-                        'user': user_instance.id,
-                        'discount':coupon and coupon['percent'] or 0
-                    }
-
-                    serializer = ReceiptSerializer(data=receipt_data)
-                    if serializer.is_valid():
-                        serializer.save()
-                        print("Receipt saved successfully")
-                        # Notify the client the purchase was completed
-                        return Response({"success": True, "message": f"Purchase Complete, You Bought All The Specificed Items For ${totalPrice} {'With A Discount Of %'+ str(coupon['percent']) if coupon and coupon['percent'] > 0 else ''}"})
+                            print("Warning, Wrong Price")
+                            return Response({"success": False, "message": "ERROR, Something went wrong."})
                     else:
-                        print("Error in data:", serializer.errors)
+                        print("Warning, Unauthorized Item Detected.")
+                        return Response({"success": False, "message": "ERROR, Something went wrong."})
+                #if the price is as should be we carry on
+                if totalPrice == price:
+                    user_instance = MarketUser.objects.get(username=user)
+
+
+                    # if the orderid was already used we stop the process to avoid duplications
+                    if orderid in UsedOrders:
+                        return Response({"success": False, "message": "This order ID has already been used."}, status=400)
+                    
+                    # if not we add it to UsedOrders to avoid duplications
+                    UsedOrders.append(orderid)
+
+                    # Get The Order details from paypal
+                    sale_details = get_sale_id(orderid)
+
+                    # make sure the order actually exists in paypal api
+                    if(sale_details):
+                        #make sure the order is not older than 1 minute.
+                        if(not check_time_elapsed(sale_details['sale_id']['create_time'])):
+                            return Response({"success": False, "message": "This order ID has already been used."}, status=400) # Too Old
+                        
+                        #if a coupon is used we caculate what price the client should pay
+                        if(coupon and 'code' in coupon):
+                            coupon_code = coupon['code']
+                            existing_coupon = Coupon.objects.filter(code=coupon_code).first()
+                            if not existing_coupon:
+                                return Response({'success': False, 'message': "The Coupon You Have sent does not exist"}, status=400)
+                            else:
+                                print(f"Coupon {coupon_code} Found Successfully, %{coupon['percent']} Given")
+                                existing_coupon.delete()
+                                totalPrice = Decimal(float(totalPrice) - (coupon['percent'] / 100) * float(totalPrice))
+                                totalPrice = round(totalPrice, 2)
+                            
+                        #Add the order to a list to avoid having it used twice
+                        
+
+                        #prepare the receipt
+                        receipt_data = {
+                            'orderid': orderid or "UNKNOWN ERROR",
+                            'products': json.dumps(PurchasedItems),
+                            'price': float(totalPrice),
+                            'user': user_instance.id,
+                            'discount':coupon and coupon['percent'] or 0
+                        }
+
+                        serializer = ReceiptSerializer(data=receipt_data)
+                        if serializer.is_valid():
+                            serializer.save()
+                            print("Receipt saved successfully")
+                            # Notify the client the purchase was completed
+                            return Response({"success": True, "message": f"Purchase Complete, You Bought All The Specificed Items For ${totalPrice} {'With A Discount Of %'+ str(coupon['percent']) if coupon and coupon['percent'] > 0 else ''}"})
+                        else:
+                            print("Error in data:", serializer.errors)
+                    else:
+                        return Response({"success":False, "message":f"ERROR: OrderID {orderid or 'UNKNOWN'} does not exist."})
                 else:
-                    return Response({"success":False, "message":f"ERROR: OrderID {orderid or 'UNKNOWN'} does not exist."})
-            else:
-                print(f"Warning Wrong Price Client Reported: {type(price)}, Server Calculated: {type(totalPrice)}")
-                print(f"Client Reported Price: {price}, Server Calculated Price: {totalPrice}")
-                return Response({"success": False, "message": "Purchase Failed"})
-        except ObjectDoesNotExist:
-                print(f"Warning, Unauthorized Item Detected.")
-                return Response({"success": False, "message": "ERROR, Something went wrong."})
+                    print(f"Warning Wrong Price Client Reported: {type(price)}, Server Calculated: {type(totalPrice)}")
+                    print(f"Client Reported Price: {price}, Server Calculated Price: {totalPrice}")
+                    return Response({"success": False, "message": "Purchase Failed"})
+            except ObjectDoesNotExist:
+                    print(f"Warning, Unauthorized Item Detected.")
+                    return Response({"success": False, "message": "ERROR, Something went wrong."})
+        except Exception as e:
+            logger.error(f"Error in POST /productlist: {e}")
+            return Response({"error": "An error occurred during the purchase process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @permission_classes([IsAuthenticated])
 @api_view(["POST"])  
@@ -230,6 +234,7 @@ def getcoupon(request):
                 "id": serialized_data["id"],  # Adjust with the actual attribute names
                 "code": serialized_data["code"],
                 "percent": serialized_data["percent"],
+                "min_price": serialized_data["min_price"],
 
                 # Include other attributes as needed
             }
