@@ -78,15 +78,12 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-# @api_view(['GET'])
-# def index(request):
-#     Coupon.objects.all().delete()
-#     addcoupon = {"code":"abcdefgh", "desc":"XMAS", "percent":50,"min_price":500}
-#     serializer = CouponSerializer(data=addcoupon)
-#     if serializer.is_valid():  
-#         serializer.save()
-#         return Response({"success": True, "message": f"The Product Was Added Successfully", "product":serializer.data},status=status.HTTP_201_CREATED)
-#     return JsonResponse('hello', safe=False)
+from django.http import JsonResponse
+
+@api_view(['GET'])
+def index(request):
+    return JsonResponse({'message': 'No Access To This Url.'}, safe=False)
+
 
 
 
