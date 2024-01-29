@@ -1,6 +1,6 @@
 from rest_framework import serializers
 # from .models import UserProfile,Product,Category, Receipt
-from .models import MarketUser,Product,Category, Receipt, Coupon
+from .models import MarketUser,Product,Category, Receipt, Coupon, Contact
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,3 +32,9 @@ class CouponSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['code'] = Coupon.generate_unique_code()
         return super().create(validated_data)
+    
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = '__all__'

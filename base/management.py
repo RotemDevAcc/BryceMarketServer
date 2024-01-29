@@ -14,8 +14,8 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 # Management
-@permission_classes([IsAuthenticated, IsAdminUser])
 @api_view(["GET"])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def receipts(request):    
     try:
         receipts = Receipt.objects.all()
@@ -44,8 +44,8 @@ def receipts(request):
         return Response({"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@permission_classes([IsAuthenticated, IsAdminUser])
 @api_view(["GET"])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def get_user_receipts(request,pk):
     try:
         ruser = MarketUser.objects.get(id=pk)
@@ -73,8 +73,8 @@ def get_user_receipts(request,pk):
 
 lockdown = False
 
-@permission_classes([IsAuthenticated,IsAdminUser])
 @api_view(["PUT"])
+@permission_classes([IsAuthenticated,IsAdminUser])
 def setstaff(request):
     if lockdown:
         return Response({"success": False, "message": f"User not found"})
@@ -105,8 +105,8 @@ def setstaff(request):
     # try:
         # ruser = MarketUser.objects.get(id=pk)
 
-@permission_classes([IsAuthenticated,IsAdminUser])
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated,IsAdminUser])
 def deleteuser(request,pk):
     if lockdown:
         return Response({"success": False, "message": f"User not found"})

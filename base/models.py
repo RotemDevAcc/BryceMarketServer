@@ -61,3 +61,12 @@ class Coupon(models.Model):
     @staticmethod
     def generate_unique_code():
         return str(uuid.uuid4())[:8]  # Generates a unique 8 character code
+
+class Contact(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    email = models.EmailField(max_length=100)
+    message = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name  # You can customize this method to display the name when printing a Contact object

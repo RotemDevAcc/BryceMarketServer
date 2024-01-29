@@ -207,8 +207,8 @@ def productlist(request):
             logger.error(f"Error in POST /productlist: {e}")
             return Response({"error": "An error occurred during the purchase process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@permission_classes([IsAuthenticated])
 @api_view(["POST"])  
+@permission_classes([IsAuthenticated])
 def getcoupon(request):
     data = request.data
     # make sure the coupon the client uses exists before we move on to payment
@@ -282,8 +282,8 @@ class RegistrationView(APIView):
     
 
 
-@permission_classes([IsAuthenticated])
 @api_view(["GET","PUT"])
+@permission_classes([IsAuthenticated])
 def modprofile(request):
     if request.method == "GET":
         ruser = request.user
