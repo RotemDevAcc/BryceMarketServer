@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 2. Navigate to the project directory:
    ```bash
-   cd BryceMarketServer
+   cd Back
    ```
 
 
