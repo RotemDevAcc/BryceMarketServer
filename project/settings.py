@@ -194,6 +194,7 @@ PASSWORD_RESET_URL = 'http://localhost:3000/reset-password/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Paypal
+PAYPAL_MODE = "sandbox" # Change to "live" for production or "sandbox" for development
 PAYPAL_CLIENT_ID = "AUYRjtY2_vXsZMeIQWnqTM5JLYztUm3tqA_Wd-2Do5cHGISL-hKYAWg9Ua82DvEUbvIrvfHmjzBHdOlA"
 PAYPAL_CLIENT_SECRET = "EELfk9mjOgOCiO1c4OgngZleQtw6Bsj2r_blauqooIBGC726rs3Me3wiFcFdkFg1w-3EZcT-GcS8PyZm"
 
