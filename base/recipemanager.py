@@ -1,4 +1,4 @@
-
+from .logger import log_action
 recipes = [
     {
         'name': 'Toasted Cheese Sandwich',
@@ -150,28 +150,38 @@ class RecommendRecipesAPIView(APIView):
 
         except MarketUser.DoesNotExist:
             return Response({"success": False, "message": f"User not found"})
+        except Exception as e:
+            log_action("ERROR",f"Error in post_recommended_recipes: {str(e)}")
+            return {}
     def get_products_from_user_receipts(self, user):
-        # Retrieve products from user's receipts (modify as needed based on your model structure)
-        user_receipts = Receipt.objects.filter(user=user)
-        if not user_receipts:
-            return False,[]
-        
-        # Get the item IDs from the receipts
-        item_ids = [item['item'] for receipt in user_receipts for item in json.loads(receipt.products)]
-        
-        # Fetch product descriptions from the Product model
-        products = Product.objects.filter(id__in=item_ids)
-        product_descriptions = [product.desc for product in products]
-        
-        return True,product_descriptions
+        try:
+            # Retrieve products from user's receipts (modify as needed based on your model structure)
+            user_receipts = Receipt.objects.filter(user=user)
+            if not user_receipts:
+                return False, []
 
+            # Get the item IDs from the receipts
+            item_ids = [item['item'] for receipt in user_receipts for item in json.loads(receipt.products)]
+
+            # Fetch product descriptions from the Product model
+            products = Product.objects.filter(id__in=item_ids)
+            product_descriptions = [product.desc for product in products]
+
+            return True, product_descriptions
+        except Exception as e:
+            log_action("ERROR",f"Error in get_products_from_user_receipts: {str(e)}")
+            return False, []
 
     def get_recommended_recipes(self, recommended_product_names):
-        # Directly use the provided recipes array and filter by matching ingredients
-        matching_recipes = [recipe for recipe in recipes if any(ingredient.lower() in recommended_product_names for ingredient in recipe['ingredients'])]
+        try:
+            # Directly use the provided recipes array and filter by matching ingredients
+            matching_recipes = [recipe for recipe in recipes if any(ingredient.lower() in recommended_product_names for ingredient in recipe['ingredients'])]
 
-        # Select a random recipe from the matching ones
-        if matching_recipes:
-            return random.choice(matching_recipes)
-        else:
-            return {}  # Return an empty object if there are no matching recipes
+            # Select a random recipe from the matching ones
+            if matching_recipes:
+                return random.choice(matching_recipes)
+            else:
+                return {}  # Return an empty object if there are no matching recipes
+        except Exception as e:
+            log_action("ERROR",f"Error in get_recommended_recipes: {str(e)}")
+            return {}

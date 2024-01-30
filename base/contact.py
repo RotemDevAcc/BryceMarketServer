@@ -6,9 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAdminUser
 from .models import Contact
-import logging
-
-logger = logging.getLogger(__name__)
+from .logger import log_action
 
 @permission_classes([IsAuthenticated])
 class ContactCreateView(APIView):
@@ -27,7 +25,7 @@ class ContactCreateView(APIView):
             # Return the serialized contacts as a JSON response
             return Response({"success":True , 'message': "Messages Delivered Successfully", "data": serializer.data},status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"An exception occurred while fetching the contacts: {str(e)}")
+            log_action("ERROR",f"An exception occurred while fetching the contacts: {str(e)}")
             return Response({"success": False,'message': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def post(self, request, format=None):
         try:
@@ -46,10 +44,10 @@ class ContactCreateView(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 errors = serializer.errors
-                logger.error(f"Failed to create a new contact: {errors}")
+                log_action("ERROR",f"Failed to create a new contact: {errors}")
                 return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"An exception occurred while creating a new contact: {str(e)}")
+            log_action("ERROR",f"An exception occurred while creating a new contact: {str(e)}")
             return Response({'detail': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def delete(self, request, id=None):
         try:
@@ -69,5 +67,5 @@ class ContactCreateView(APIView):
             return Response({"success":True,'message': 'Contact deleted successfully'}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error(f"An exception occurred while deleting the contact: {str(e)}")
+            log_action("ERROR",f"An exception occurred while deleting the contact: {str(e)}")
             return Response({"success":False,'message': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

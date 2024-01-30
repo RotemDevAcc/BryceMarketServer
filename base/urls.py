@@ -7,6 +7,7 @@ from .management import ProductsView, PManagemetView, UManagementView, CManageme
 from .recipemanager import RecommendRecipesAPIView
 from .passwordreset import PasswordResetRequestView, PasswordResetConfirmView
 from .contact import ContactCreateView
+from .reviews import CreateProductReview
 urlpatterns = [
     # path('', views.index),
     path('products/', ProductsView.as_view(), name='product-list'),
@@ -37,4 +38,8 @@ urlpatterns = [
     #Contact
     path('contact/', ContactCreateView.as_view(), name='contact_form'),
     path('contact/<int:id>/', ContactCreateView.as_view(),name='delete_contact'),
+
+    #Product Reviews
+    path('reviews/', CreateProductReview.as_view(), name='create-review'),
+    path('reviews/<int:pk>/', CreateProductReview.as_view(), name='create-review'),
 ]

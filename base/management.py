@@ -11,8 +11,7 @@ from .models import MarketUser, Product, Receipt, Category, Coupon
 from .serializer import UserSerializer, ProductSerializer, CategorySerializer, ReceiptSerializer, CouponSerializer
 
 import json
-import logging
-logger = logging.getLogger(__name__)
+from .logger import log_action
 # Management
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdminUser])
@@ -36,11 +35,11 @@ def receipts(request):
                     "recuser": {"userid": recuser.id, "username": recuser.username}
                 })
             except MarketUser.DoesNotExist as e:
-                logger.error(f"User Receipts not found: {e}")
+                log_action("ERROR",f"User Receipts not found: {e}")
                 return Response({"success": False, "message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response({"success":True,"payload":payload,"products":allproducts,"message":"Success"})
     except Exception as e:
-        logger.error(f"Error in retrieving receipts: {e}")
+        log_action("ERROR",f"Error in retrieving receipts: {e}")
         return Response({"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -157,7 +156,7 @@ class UManagementView(APIView):
             serializer = UserSerializer(sendusers, many=True)
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"Error in GET /umanagment/users: {e}")
+            log_action("ERROR",f"Error in GET /umanagment/users: {e}")
             return Response({"error": "An error occurred while fetching users"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
@@ -168,7 +167,7 @@ class UManagementView(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"Error in POST /umanagment/users: {e}")
+            log_action("ERROR",f"Error in POST /umanagment/users: {e}")
             return Response({"error": "An error occurred while creating a user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
    
     def put(self, request, pk):
@@ -182,7 +181,7 @@ class UManagementView(APIView):
         except MarketUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error in PUT /users/{pk}: {e}")
+            log_action("ERROR",f"Error in PUT /users/{pk}: {e}")
             return Response({"error": "An error occurred while updating the user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
    
@@ -194,7 +193,7 @@ class UManagementView(APIView):
         except MarketUser.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error in DELETE /users/{pk}: {e}")
+            log_action("ERROR",f"Error in DELETE /users/{pk}: {e}")
             return Response({"error": "An error occurred while deleting the user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     
@@ -206,7 +205,7 @@ class CManagementView(APIView):
             serializer = CouponSerializer(coupons, many=True)
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"Error in GET /coupons/: {e}")
+            log_action("ERROR",f"Error in GET /coupons/: {e}")
             return Response({"error": "An error occurred while trying to get all coupons"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
@@ -217,7 +216,7 @@ class CManagementView(APIView):
                 return Response({"success": True, "message": "Coupon Added Successfully"}, status=status.HTTP_201_CREATED)
             return Response({"success": False, "message": "Coupon Creation Failed"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"Error in POST /coupons: {e}")
+            log_action("ERROR",f"Error in POST /coupons: {e}")
             return Response({"error": "An error occurred while creating a coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
    
@@ -232,7 +231,7 @@ class CManagementView(APIView):
         except Coupon.DoesNotExist:
             return Response({"error": "Coupon not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error in PUT /coupons/{pk}: {e}")
+            log_action("ERROR",f"Error in PUT /coupons/{pk}: {e}")
             return Response({"error": "An error occurred while updating the coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
    
@@ -244,7 +243,7 @@ class CManagementView(APIView):
         except Coupon.DoesNotExist:
             return Response({"error": "Coupon not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error in DELETE /coupons/{pk}: {e}")
+            log_action("ERROR",f"Error in DELETE /coupons/{pk}: {e}")
             return Response({"error": "An error occurred while deleting the coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -259,7 +258,7 @@ class ProductsView(APIView):
             serializer = ProductSerializer(products, many=True)
             return Response(serializer.data)
         except Exception as e:
-            logger.error(f"Error in GET /products: {e}")
+            log_action("ERROR",f"Error in GET /products: {e}")
             return Response({"error": "An error occurred while fetching products"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -271,7 +270,7 @@ class ProductsView(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"Error in POST /products: {e}")
+            log_action("ERROR",f"Error in POST /products: {e}")
             return Response({"error": "An error occurred while creating a product"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
    
@@ -286,7 +285,7 @@ class ProductsView(APIView):
         except Product.DoesNotExist:
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error in PUT /products/{pk}: {e}")
+            log_action("ERROR",f"Error in PUT /products/{pk}: {e}")
             return Response({"error": "An error occurred while updating the product"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
    
@@ -298,7 +297,7 @@ class ProductsView(APIView):
         except Product.DoesNotExist:
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error in DELETE /products/{pk}: {e}")
+            log_action("ERROR",f"Error in DELETE /products/{pk}: {e}")
             return Response({"error": "An error occurred while deleting the product"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     

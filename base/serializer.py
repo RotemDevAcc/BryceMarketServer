@@ -38,3 +38,10 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = '__all__'
+
+from .models import ProductReviews
+
+class ProductReviewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReviews
+        fields = '__all__'  # Include all fields from ProductReviews model

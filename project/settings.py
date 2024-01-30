@@ -183,6 +183,9 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER") # Update with your email use
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") # Update with your email password
 
 
+# Sent To passwordreset.py
+# this is your react app url
+PASSWORD_RESET_URL = 'http://localhost:3000/reset-password/'
 
 
 # Default primary key field type

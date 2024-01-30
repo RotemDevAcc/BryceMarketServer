@@ -1,3 +1,4 @@
+from project.settings import PASSWORD_RESET_URL
 from .models import MarketUser
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -10,13 +11,14 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.core.exceptions import ValidationError
 
+
 class PasswordResetRequestView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         try:
             user = MarketUser.objects.get(email=email)
             token = default_token_generator.make_token(user)
-            reset_link = f"http://localhost:3000/reset-password/{user.pk}/{token}"
+            reset_link = f"{PASSWORD_RESET_URL}{user.pk}/{token}"
 
             send_mail(
                 'Password Reset Request',

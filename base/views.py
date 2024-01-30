@@ -13,8 +13,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.files.uploadedfile import SimpleUploadedFile
 import json
 from decimal import Decimal
-import logging
-logger = logging.getLogger(__name__)
+from .logger import log_action
 
 
 from datetime import datetime, timedelta
@@ -102,7 +101,7 @@ def productlist(request):
             combined_data = {'products': serializer.data, 'categories': serializer2.data}
             return Response(combined_data)
         except Exception as e:
-            logger.error(f"Error in GET /productlist: {e}")
+            log_action("ERROR",f"Error in GET /productlist: {e}")
             return Response({"error": "An error occurred while fetching products and categories"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     elif request.method == "POST":
         # The Client purchased the cart
@@ -137,9 +136,11 @@ def productlist(request):
                             })
                         else:
                             print("Warning, Wrong Price")
+                            log_action("WARNING", "Wrong Price")
                             return Response({"success": False, "message": "ERROR, Something went wrong."})
                     else:
                         print("Warning, Unauthorized Item Detected.")
+                        log_action("WARNING", "Unauthorized Item Detected")
                         return Response({"success": False, "message": "ERROR, Something went wrong."})
                 #if the price is as should be we carry on
                 if totalPrice == price:
@@ -189,11 +190,13 @@ def productlist(request):
                         serializer = ReceiptSerializer(data=receipt_data)
                         if serializer.is_valid():
                             serializer.save()
+                            log_action("INFO", "Receipt saved successfully")
                             print("Receipt saved successfully")
                             # Notify the client the purchase was completed
                             return Response({"success": True, "message": f"Purchase Complete, You Bought All The Specificed Items For ${totalPrice} {'With A Discount Of %'+ str(coupon['percent']) if coupon and coupon['percent'] > 0 else ''}"})
                         else:
                             print("Error in data:", serializer.errors)
+                            log_action("ERROR", f"Error in data: {serializer.errors}")
                     else:
                         return Response({"success":False, "message":f"ERROR: OrderID {orderid or 'UNKNOWN'} does not exist."})
                 else:
@@ -202,9 +205,10 @@ def productlist(request):
                     return Response({"success": False, "message": "Purchase Failed"})
             except ObjectDoesNotExist:
                     print(f"Warning, Unauthorized Item Detected.")
+                    log_action("WARNING", "Unauthorized Item Detected")
                     return Response({"success": False, "message": "ERROR, Something went wrong."})
         except Exception as e:
-            logger.error(f"Error in POST /productlist: {e}")
+            log_action("EXCEPTION",f"Error in POST /productlist: {e}")
             return Response({"error": "An error occurred during the purchase process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(["POST"])  

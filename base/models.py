@@ -70,3 +70,12 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.name  # You can customize this method to display the name when printing a Contact object
+    
+class ProductReviews(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')  # Link to the Product model
+    name = models.CharField(max_length=50)  # Name of the reviewer
+    email = models.EmailField(max_length=100)  # Email of the reviewer
+    message = models.TextField()  # Review message
+
+    def __str__(self):
+        return f"{self.name} - {self.product}"
