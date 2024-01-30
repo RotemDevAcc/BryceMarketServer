@@ -14,7 +14,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 import json
 from decimal import Decimal
 from .logger import log_action
-
+from project.settings import PAYPAL_MODE,PAYPAL_CLIENT_ID,PAYPAL_CLIENT_SECRET
 
 from datetime import datetime, timedelta
 import pytz
@@ -36,9 +36,9 @@ UsedOrders = []
 import paypalrestsdk         
 from paypalrestsdk import Sale
 paypalrestsdk.configure({
-    "mode": "sandbox",  # Change to "live" for production
-    "client_id": "AUYRjtY2_vXsZMeIQWnqTM5JLYztUm3tqA_Wd-2Do5cHGISL-hKYAWg9Ua82DvEUbvIrvfHmjzBHdOlA",
-    "client_secret": "EELfk9mjOgOCiO1c4OgngZleQtw6Bsj2r_blauqooIBGC726rs3Me3wiFcFdkFg1w-3EZcT-GcS8PyZm"
+    "mode": PAYPAL_MODE,  
+    "client_id": PAYPAL_CLIENT_ID,
+    "client_secret": PAYPAL_CLIENT_SECRET
 })
 
 def get_sale_id(payment_id):
