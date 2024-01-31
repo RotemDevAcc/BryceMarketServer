@@ -185,7 +185,8 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") # Update with your e
 
 # Sent To passwordreset.py
 # this is your react app url
-PASSWORD_RESET_URL = 'http://localhost:3000/reset-password/'
+PASSWORD_RESET_URL = 'https://vermillion-longma-f04f54.netlify.app/reset-password/'
+# PASSWORD_RESET_URL = 'http://localhost:3000/reset-password/'
 
 
 # Default primary key field type

@@ -72,3 +72,5 @@ pip install -r requirements.txt
    ```bash
    python manage.py runserver
    ```
+
+## Designed To Work With https://github.com/RotemDevAcc/BryceMarketReact As A FrontEnd
