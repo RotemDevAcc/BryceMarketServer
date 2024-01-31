@@ -56,7 +56,19 @@ pip install -r requirements.txt
    PAYPAL_CLIENT_SECRET = "YOUR_PAYPAL_CLIENTSECRET"
    ```
 
-7. Start the development server:
+7. Set up your email for password resets in settings.py
+   # Tutuorial https://www.youtube.com/watch?v=lezhrFdVSVY for setting enviorment variables
+   ```bash
+   EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+   EMAIL_HOST = 'smtp.gmail.com'  # Update with your email provider's SMTP server
+   EMAIL_PORT = 587  # Update with the appropriate port for your email provider
+   EMAIL_USE_TLS = True
+   EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER") # Update with your email username or use an enviorment variable like i did
+   EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD") # Update with your email password or use an enviorment variable like i did
+   ```
+
+
+8. Start the development server:
    ```bash
    python manage.py runserver
    ```
