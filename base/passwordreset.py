@@ -19,7 +19,7 @@ class PasswordResetRequestView(APIView):
 
             if(os.environ.get("EMAIL_HOST_USER") == None):
                 print("No EMAIL_HOST_USER Enviorment Set, Password Reset Failed.")
-                return Response({'message': f'Password Reset Failed Please Contact the site owner'})
+                return Response({"success":False,'message': f'Password Reset Failed Please Contact the site owner'})
 
             user = MarketUser.objects.get(email=email)
             token = default_token_generator.make_token(user)
@@ -32,13 +32,13 @@ class PasswordResetRequestView(APIView):
                 [email],
                 fail_silently=False,
             )
-            return Response({"message": "If an account with that email exists, a password reset link has been sent."}, status=status.HTTP_200_OK)
+            return Response({"success":True,"message": "If an account with that email exists, a password reset link has been sent."}, status=status.HTTP_200_OK)
         except MarketUser.DoesNotExist:
             # Mimicking the behavior of your old function
-            return Response({'message': f'Password Reset Sent To {email}'})
+            return Response({"success":False,'message': f'Password Reset Sent To {email}'})
         except Exception as e:
             # Catching any other errors
-            return Response({'message': "Something Went Wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success":False,'message': "Something Went Wrong"}, status=status.HTTP_400_BAD_REQUEST)
         
 
 class PasswordResetConfirmView(APIView):
