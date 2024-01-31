@@ -26,37 +26,31 @@ pip install -r requirements.txt
    git clone https://github.com/RotemDevAcc/BryceMarketServer.git
    ```
 
-2. Navigate to the project directory:
-   ```bash
-   cd Back
-   ```
-
-
-3. Run database migrations:
+2. Run database migrations:
    ```bash
    python manage.py migrate
    ```
 
-4. access settings.py and set your web url there for password reset:
+3. access settings.py and set your web url there for password reset:
    ```bash
    SECRET_KEY = 'YOUR_DJANGO_SECRET_KEY'
    ```
    Use this website to generate a key: https://djecrety.ir/
 
-5. access settings.py and set your web url there for password reset:
+4. access settings.py and set your web url there for password reset:
    ```bash
    PASSWORD_RESET_URL = 'your url'
    ```
 
    
    
-6. access settings.py and set your paypal details there too:
+5. access settings.py and set your paypal details there too:
    ```bash
    PAYPAL_CLIENT_ID = "YOUR_PAYPAL_CLIENTID"
    PAYPAL_CLIENT_SECRET = "YOUR_PAYPAL_CLIENTSECRET"
    ```
 
-7. Set up your email for password resets in settings.py
+6. Set up your email for password resets in settings.py
    # Tutuorial https://www.youtube.com/watch?v=lezhrFdVSVY for setting enviorment variables
    ```bash
    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -68,7 +62,7 @@ pip install -r requirements.txt
    ```
 
 
-8. Start the development server:
+7. Start the development server:
    ```bash
    python manage.py runserver
    ```
