@@ -213,11 +213,12 @@ class CManagementView(APIView):
             serializer = CouponSerializer(data=request.data, context={'user': request.user})
             if serializer.is_valid():
                 serializer.save()
-                return Response({"success": True, "message": "Coupon Added Successfully"}, status=status.HTTP_201_CREATED)
+                code = serializer.data['code'] or "UNKNOWN ERROR"
+                return Response({"success": True, "message": f"Coupon Added Successfully - Code: {code}", "returncode":code}, status=status.HTTP_201_CREATED)
             return Response({"success": False, "message": "Coupon Creation Failed"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             log_action("ERROR",f"Error in POST /coupons: {e}")
-            return Response({"error": "An error occurred while creating a coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"success": False,"error": "An error occurred while creating a coupon"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
    
     def put(self, request, pk):

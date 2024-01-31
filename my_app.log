@@ -7,3 +7,26 @@
 2024-01-31 10:51:18,935 [WARNING]: Unauthorized: /login/
 2024-01-31 10:53:16,175 [INFO]: C:\Users\jbt\Documents\Rotem\[Project]\BryceMarketServer\base\passwordreset.py changed, reloading.
 2024-01-31 10:53:21,501 [INFO]: C:\Users\jbt\Documents\Rotem\[Project]\BryceMarketServer\base\passwordreset.py changed, reloading.
+2024-01-31 15:24:12,787 [WARNING]: Not Found: /static/images/undefined
+2024-01-31 15:25:45,023 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\urls.py changed, reloading.
+2024-01-31 15:26:37,979 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:26:43,650 [DEBUG]: log_action was not used properly case non-existent
+2024-01-31 15:26:43,651 [ERROR]: Internal Server Error: /cmanagement/
+2024-01-31 15:26:55,322 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:27:15,472 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:27:35,767 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:28:22,198 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:28:49,405 [DEBUG]: log_action was not used properly case non-existent
+2024-01-31 15:28:49,406 [ERROR]: Internal Server Error: /cmanagement/
+2024-01-31 15:29:00,084 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:38:11,515 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:38:23,443 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:38:34,765 [DEBUG]: log_action was not used properly case non-existent
+2024-01-31 15:38:34,766 [ERROR]: Internal Server Error: /cmanagement/
+2024-01-31 15:39:16,729 [DEBUG]: log_action was not used properly case non-existent
+2024-01-31 15:39:16,730 [ERROR]: Internal Server Error: /cmanagement/
+2024-01-31 15:39:39,781 [DEBUG]: log_action was not used properly case non-existent
+2024-01-31 15:39:39,781 [ERROR]: Internal Server Error: /cmanagement/
+2024-01-31 15:39:48,719 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:43:22,826 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.
+2024-01-31 15:43:35,598 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\base\management.py changed, reloading.

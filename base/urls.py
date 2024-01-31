@@ -21,7 +21,7 @@ urlpatterns = [
     path('umanagement/receipts/<int:pk>/',management.get_user_receipts, name='user-manage-receipts'),
     path('umanagement/set/', management.setstaff,name='set-staff'),
     path('umanagement/delete/<int:pk>/', management.deleteuser,name='delete-user'),
-    path('cmanagement/', CManagementView.as_view(), name='user-manage'),
+    path('cmanagement/', CManagementView.as_view(), name='coupon-manage'),
     path('getreceipts/', management.receipts),
 
     #Users
