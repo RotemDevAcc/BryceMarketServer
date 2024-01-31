@@ -264,6 +264,9 @@ class RegistrationView(APIView):
         lastname = data.get('lastname')
         password = data.get('password')
         email = data.get('email')
+        existing_email = MarketUser.objects.filter(email=email).exists()
+        if existing_email:
+            return Response({'success': False, 'message': "Email Already Used"}, status=400)
         gender = data.get('gender')
         date_of_birth = data.get('date')
 

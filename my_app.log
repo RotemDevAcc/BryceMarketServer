@@ -1,2 +1,9 @@
 2024-01-31 07:37:23,370 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\Back\base\passwordreset.py changed, reloading.
 2024-01-31 07:38:38,105 [INFO]: F:\Projects\[FinalProject]\BryceMarketServer\Back\base\passwordreset.py changed, reloading.
+2024-01-31 10:38:15,900 [WARNING]: Not Found: /static/images/undefined
+2024-01-31 10:38:57,969 [WARNING]: Not Found: /static/images/undefined
+2024-01-31 10:39:06,209 [WARNING]: Not Found: /static/images/undefined
+2024-01-31 10:51:09,649 [WARNING]: Unauthorized: /login/
+2024-01-31 10:51:18,935 [WARNING]: Unauthorized: /login/
+2024-01-31 10:53:16,175 [INFO]: C:\Users\jbt\Documents\Rotem\[Project]\BryceMarketServer\base\passwordreset.py changed, reloading.
+2024-01-31 10:53:21,501 [INFO]: C:\Users\jbt\Documents\Rotem\[Project]\BryceMarketServer\base\passwordreset.py changed, reloading.
