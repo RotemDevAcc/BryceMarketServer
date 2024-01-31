@@ -58,7 +58,7 @@ class PasswordResetConfirmView(APIView):
 
             if not default_token_generator.check_token(user, token):
                 print("Token check failed")
-                return Response({"error": "Invalid or expired password reset token."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"success":False, "error": "Invalid or expired password reset token."}, status=status.HTTP_400_BAD_REQUEST)
 
             user.set_password(new_password)
             user.save()
@@ -67,8 +67,8 @@ class PasswordResetConfirmView(APIView):
             update_last_login(None, user)
 
             print("Password reset successful")
-            return Response({"message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
+            return Response({"success":True, "message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
 
         except (TypeError, ValueError, OverflowError, MarketUser.DoesNotExist, ValidationError) as e:
             print("An error occurred:", str(e))
-            return Response({"error": "Invalid request."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success":False, "error": "Invalid request."}, status=status.HTTP_400_BAD_REQUEST)
